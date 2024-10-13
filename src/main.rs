@@ -3,6 +3,7 @@ use axum::middleware;
 use axum::response::{IntoResponse, Response};
 use axum::routing::get_service;
 use axum::{response::Html, Router};
+use model::ModelController;
 use serde::Deserialize;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
@@ -17,9 +18,15 @@ mod web;
 // Start server via:
 // cargo watch -q -c -w src/ -x run
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
+    let controller = ModelController::new().await?;
+
+    let routes_apis = web::routes_tickets::routes(controller.clone())
+        .route_layer(middleware::from_fn(web::mw_auth::require_auth));
+
     let routes = Router::new()
         .merge(web::routes_login::routes())
+        .nest("/api", routes_apis)
         .layer(middleware::map_response(main_response_mapper))
         .layer(CookieManagerLayer::new())
         .fallback_service(static_routes());
@@ -28,6 +35,8 @@ async fn main() {
     let listener = TcpListener::bind(addr).await.unwrap();
     println!("LISTENING on {addr}\n");
     axum::serve(listener, routes).await.unwrap();
+
+    Ok(())
 }
 
 async fn main_response_mapper(res: Response) -> Response {
