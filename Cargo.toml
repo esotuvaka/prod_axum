@@ -8,6 +8,8 @@ tokio = { version = "1", features=["full"] }
 axum = "0.7.7"
 serde = { version = "1", features=["derive"]}
 serde_json = "1"
+tower-http = { version = "0.6.1", features = ["fs"] }
+tower-cookies = "0.10.0"
 
 [dev-dependencies]
 anyhow = "1"
