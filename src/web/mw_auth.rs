@@ -1,5 +1,4 @@
 use crate::ctx::Ctx;
-use crate::model::ModelController;
 use crate::web::AUTH_TOKEN;
 use crate::{Error, Result};
 use axum::body::Body;
@@ -26,7 +25,7 @@ impl<S: Send + Sync> FromRequestParts<S> for Ctx {
         println!("{:<12} - Ctx", "EXTRACTOR");
         let cookies = parts.extract::<Cookies>().await.unwrap();
         let auth_token = cookies.get(AUTH_TOKEN).map(|c| c.value().to_string());
-        let (user_id, exp, sign) = auth_token
+        let (user_id, _exp, _sign) = auth_token
             .ok_or(Error::AuthFailNoAuthTokenCookie)
             .and_then(parse_token)?;
         Ok(Ctx::new(user_id))

@@ -1,10 +1,16 @@
-use axum::extract::Query;
+// use axum::extract::Query;
 use axum::middleware;
-use axum::response::{IntoResponse, Response};
+use axum::response::{
+    // IntoResponse,
+    Response,
+};
 use axum::routing::get_service;
-use axum::{response::Html, Router};
+use axum::{
+    // response::Html,
+    Router,
+};
 use model::ModelController;
-use serde::Deserialize;
+// use serde::Deserialize;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
 use tower_http::services::ServeDir;
@@ -46,16 +52,16 @@ async fn main_response_mapper(res: Response) -> Response {
     res
 }
 
-#[derive(Debug, Deserialize)]
-struct HelloParams {
-    name: Option<String>,
-}
+// #[derive(Debug, Deserialize)]
+// struct HelloParams {
+//     name: Option<String>,
+// }
 
-async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
-    println!("{:<12} - handler_hello", "HANDLER");
-    let name = params.name.as_deref().unwrap_or("World!");
-    Html(format!("Hello <strong>{name}!!!</strong>"))
-}
+// async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
+//     println!("{:<12} - handler_hello", "HANDLER");
+//     let name = params.name.as_deref().unwrap_or("World!");
+//     Html(format!("Hello <strong>{name}!!!</strong>"))
+// }
 
 fn static_routes() -> Router {
     Router::new().nest_service("/", get_service(ServeDir::new("./")))
