@@ -4,6 +4,7 @@ use crate::Result;
 use axum::extract::{FromRef, Path, State};
 use axum::routing::{delete, post};
 use axum::{Json, Router};
+use tracing::debug;
 
 #[derive(Clone, FromRef)]
 struct AppState {
@@ -23,7 +24,7 @@ async fn create_ticket(
     ctx: Ctx,
     Json(ticket): Json<TicketCreate>,
 ) -> Result<Json<Ticket>> {
-    println!("{:<12} - create_ticket", "HANDLER");
+    debug!("{:<12} - create_ticket", "HANDLER");
     let ticket = controller.create(ctx, ticket).await?;
     Ok(Json(ticket))
 }
@@ -32,7 +33,7 @@ async fn list_tickets(
     State(controller): State<ModelController>,
     ctx: Ctx,
 ) -> Result<Json<Vec<Ticket>>> {
-    println!("{:<12} - list_tickets", "HANDLER");
+    debug!("{:<12} - list_tickets", "HANDLER");
     let tickets = controller.list(ctx).await?;
     Ok(Json(tickets))
 }
@@ -42,7 +43,7 @@ async fn delete_ticket(
     Path(id): Path<u64>,
     ctx: Ctx,
 ) -> Result<Json<Ticket>> {
-    println!("{:<12} - delete_ticket", "HANDLER");
+    debug!("{:<12} - delete_ticket", "HANDLER");
     let ticket = controller.delete(id, ctx).await?;
     Ok(Json(ticket))
 }

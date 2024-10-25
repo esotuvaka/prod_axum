@@ -1,0 +1,10 @@
+[env]
+# Scope tracing to filter out external library's traces
+RUST_LOG="prod_axum=debug"
+
+# Service ENV vars
+# For cargo commands only
+# When deployed, ENV vars should be managed by the container
+
+# Config map
+SERVICE_WEB_FOLDER="web-folder/"
