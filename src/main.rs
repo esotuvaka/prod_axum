@@ -11,9 +11,10 @@ use axum::{
     // response::Html,
     Router,
 };
-use ctx::Ctx;
-use log::log_request;
-use model::ModelController;
+
+use context::ctx::Ctx;
+use log::log::log_request;
+use model::model::ModelController;
 use serde_json::json;
 // use serde::Deserialize;
 use tokio::net::TcpListener;
@@ -23,7 +24,7 @@ use uuid::Uuid;
 
 pub use self::error::{Error, Result};
 
-mod ctx;
+mod context;
 mod error;
 mod log;
 mod model;

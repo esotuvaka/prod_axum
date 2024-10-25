@@ -1,14 +1,14 @@
-use crate::ctx::Ctx;
-use crate::model::ModelController;
+use crate::context::ctx::Ctx;
+use crate::model::model::ModelController;
 use crate::web::AUTH_TOKEN;
 use crate::{Error, Result};
+use axum::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
 use axum::http::request::Parts;
 use axum::http::Request;
 use axum::middleware::Next;
 use axum::response::Response;
-use axum::{async_trait, RequestPartsExt};
 use lazy_regex::regex_captures;
 use tower_cookies::{Cookie, Cookies};
 
