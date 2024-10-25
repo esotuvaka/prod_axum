@@ -5,7 +5,7 @@
 mod config;
 mod context;
 mod error;
-mod log;
+mod logs;
 mod model;
 mod web;
 // #[cfg(test)] // Commented during early development.
@@ -50,10 +50,7 @@ async fn main() -> Result<()> {
         .merge(routes_login::routes())
         // .nest("/api", routes_rpc)
         .layer(middleware::map_response(mw_reponse_map))
-        .layer(middleware::from_fn_with_state(
-            mm.clone(),
-            mw_ctx_resolve::<Body>,
-        ))
+        .layer(middleware::from_fn_with_state(mm.clone(), mw_ctx_resolve))
         .layer(CookieManagerLayer::new())
         .fallback_service(routes_static::serve_dir());
 

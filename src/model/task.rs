@@ -50,6 +50,24 @@ mod tests {
     async fn test_create_ok() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
+        let t_title = "test_create_ok title";
+
+        let task = TaskCreate {
+            title: t_title.to_string(),
+        };
+        let id = TaskController::create(&ctx, &mm, task).await?;
+        let (title,): (String,) = sqlx::query_as("SELECT title from task where id = $1")
+            .bind(id)
+            .fetch_one(mm.db())
+            .await?;
+
+        assert_eq!(title, t_title);
+
+        let count = sqlx::query("DELETE FROM task WHERE id = $1")
+            .bind(id)
+            .execute(mm.db())
+            .await?
+            .rows_affected();
         Ok(())
     }
 }

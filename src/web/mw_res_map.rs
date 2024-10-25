@@ -1,5 +1,5 @@
 use crate::context::Ctx;
-use crate::log::log::log_request;
+use crate::logs::log::log_request;
 use crate::web;
 use axum::http::{Method, Uri};
 use axum::response::{IntoResponse, Response};

@@ -14,11 +14,7 @@ use tower_cookies::{Cookie, Cookies};
 use tracing::debug;
 
 #[allow(dead_code)] // For now, until we have the rpc.
-pub async fn mw_ctx_require<B>(
-    ctx: Result<Ctx>,
-    req: Request<Body>,
-    next: Next,
-) -> Result<Response> {
+pub async fn mw_ctx_require(ctx: Result<Ctx>, req: Request<Body>, next: Next) -> Result<Response> {
     debug!("{:<12} - mw_ctx_require - {ctx:?}", "MIDDLEWARE");
 
     ctx?;
@@ -26,7 +22,7 @@ pub async fn mw_ctx_require<B>(
     Ok(next.run(req).await)
 }
 
-pub async fn mw_ctx_resolve<B>(
+pub async fn mw_ctx_resolve(
     _mm: State<ModelManager>,
     cookies: Cookies,
     mut req: Request<Body>,
@@ -41,7 +37,7 @@ pub async fn mw_ctx_resolve<B>(
 
     // Remove the cookie if something went wrong other than NoAuthTokenCookie.
     if result_ctx.is_err() && !matches!(result_ctx, Err(CtxExtError::TokenNotInCookie)) {
-        cookies.remove(Cookie::named(AUTH_TOKEN))
+        cookies.remove(Cookie::from(AUTH_TOKEN))
     }
 
     // Store the ctx_result in the request extension.
