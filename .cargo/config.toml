@@ -6,5 +6,9 @@ RUST_LOG="prod_axum=debug"
 # For cargo commands only
 # When deployed, ENV vars should be managed by the container
 
-# Config map
+## -- Secrets
+# Keys and passwords are for localhost dev ONLY! Not encrypted
+SERVICE_DB_URL="postgres://app_user:dev_only_pwd@localhost/app_db"
+
+## -- Config map
 SERVICE_WEB_FOLDER="web-folder/"
