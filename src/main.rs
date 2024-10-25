@@ -5,12 +5,14 @@ mod log;
 mod model;
 mod web;
 
+// #[cfg(test)]
+pub mod _dev_utils;
+
 pub use self::error::{Error, Result};
 pub use config::config;
 
 use axum::http::{Method, Uri};
 use axum::response::{IntoResponse, Response};
-use axum::routing::get_service;
 use axum::Router;
 use axum::{middleware, Json};
 use context::ctx::Ctx;
@@ -19,7 +21,6 @@ use model::model::ModelController;
 use serde_json::json;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
-use tower_http::services::ServeDir;
 use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
@@ -33,6 +34,9 @@ async fn main() -> Result<()> {
         .with_target(false)
         .with_env_filter(EnvFilter::from_default_env())
         .init();
+
+    // For DEV only
+    _dev_utils::init_dev().await;
 
     let controller = ModelController::new().await?;
 
