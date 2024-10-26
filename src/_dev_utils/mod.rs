@@ -46,10 +46,8 @@ pub async fn seed_tasks(ctx: &Ctx, mm: &ModelManager, titles: &[&str]) -> model:
             },
         )
         .await?;
-        println!("{}", id);
         let task = TaskController::get(ctx, mm, id).await?;
         tasks.push(task);
     }
-    println!("{:?}", tasks);
     Ok(tasks)
 }

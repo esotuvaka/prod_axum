@@ -4,6 +4,8 @@ use crate::model::{Error, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
+use super::base::{self, DbController};
+
 // Types
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Task {
@@ -11,12 +13,12 @@ pub struct Task {
     pub title: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct TaskCreate {
     pub title: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct TaskUpdate {
     pub title: Option<String>,
 }
@@ -25,46 +27,29 @@ pub struct TaskUpdate {
 // Controllers
 pub struct TaskController;
 
+impl DbController for TaskController {
+    const TABLE: &'static str = "task";
+}
+
 impl TaskController {
-    pub async fn create(_ctx: &Ctx, mm: &ModelManager, task: TaskCreate) -> Result<i64> {
-        let db = mm.db();
-        let (id,) =
-            sqlx::query_as::<_, (i64,)>("INSERT INTO task (title) values ($1) returning id")
-                .bind(task.title)
-                .fetch_one(db)
-                .await?;
-        Ok(id)
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, task: TaskCreate) -> Result<i64> {
+        base::create::<Self, _>(ctx, mm, task).await
     }
 
-    pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Task> {
-        let db = mm.db();
-        let task: Task = sqlx::query_as("SELECT * FROM task WHERE id = $1")
-            .bind(id)
-            .fetch_optional(db)
-            .await?
-            .ok_or(Error::EntityNotFound { entity: "task", id })?;
-        Ok(task)
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Task> {
+        base::get::<Self, _>(ctx, mm, id).await
     }
 
-    pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Task>> {
-        let db = mm.db();
-        let tasks: Vec<Task> = sqlx::query_as("SELECT * FROM task ORDER BY id")
-            .fetch_all(db)
-            .await?;
-        Ok(tasks)
+    pub async fn list(ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Task>> {
+        base::list::<Self, _>(ctx, mm).await
     }
 
-    pub async fn delete(_ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
-        let db = mm.db();
-        let count = sqlx::query("DELETE FROM task where id = $1")
-            .bind(id)
-            .execute(db)
-            .await?
-            .rows_affected();
-        if count == 0 {
-            return Err(Error::EntityNotFound { entity: "task", id });
-        }
-        Ok(())
+    pub async fn update(ctx: &Ctx, mm: &ModelManager, id: i64, data: TaskUpdate) -> Result<()> {
+        base::update::<Self, _>(ctx, mm, id, data).await
+    }
+
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
+        base::delete::<Self>(ctx, mm, id).await
     }
 }
 // Controllers
@@ -76,8 +61,9 @@ mod tests {
 
     use super::*;
     use anyhow::Result;
+    // Ensure that tests execute serially, preventing DB state mishaps during init_test() across tests
     use serial_test::serial;
-    use tracing::debug; // Ensure that tests execute serially, preventing DB state mishaps during init_test() across tests
+    use tracing::debug;
 
     #[serial]
     #[tokio::test]
@@ -147,6 +133,34 @@ mod tests {
             ),
             "EntityNotFound not matching"
         );
+
+        Ok(())
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_update_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let t_title = "test_update_ok - task 01";
+        let t_title_new = "test_updated_ok - task 01 - new";
+        let t_task = _dev_utils::seed_tasks(&ctx, &mm, &[t_title])
+            .await?
+            .remove(0);
+
+        TaskController::update(
+            &ctx,
+            &mm,
+            t_task.id,
+            TaskUpdate {
+                title: Some(t_title_new.to_string()),
+            },
+        )
+        .await?;
+
+        // Check
+        let task = TaskController::get(&ctx, &mm, t_task.id).await?;
+        assert_eq!(task.title, t_title_new);
 
         Ok(())
     }

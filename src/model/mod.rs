@@ -11,6 +11,7 @@
 //! - A ModelManager is typically used as the app's state, e.g: 1 Manager, many Controllers
 //! - ModelManager is passed as an argument to all Model Controllers
 
+mod base;
 mod error;
 mod store;
 pub mod task;
