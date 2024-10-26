@@ -1,9 +1,16 @@
 mod dev_db;
 
 use tokio::sync::OnceCell;
-use tracing::info;
+use tracing::{debug, info};
 
-use crate::model::ModelManager;
+use crate::{
+    context::Ctx,
+    model::{
+        self,
+        task::{Task, TaskController, TaskCreate},
+        ModelManager,
+    },
+};
 
 /// Initialize environment for local development
 /// (During early development this will be called in main())
@@ -26,4 +33,23 @@ pub async fn init_test() -> ModelManager {
         })
         .await;
     mm.clone()
+}
+
+pub async fn seed_tasks(ctx: &Ctx, mm: &ModelManager, titles: &[&str]) -> model::Result<Vec<Task>> {
+    let mut tasks = Vec::new();
+    for t in titles {
+        let id = TaskController::create(
+            ctx,
+            mm,
+            TaskCreate {
+                title: t.to_string(),
+            },
+        )
+        .await?;
+        println!("{}", id);
+        let task = TaskController::get(ctx, mm, id).await?;
+        tasks.push(task);
+    }
+    println!("{:?}", tasks);
+    Ok(tasks)
 }
