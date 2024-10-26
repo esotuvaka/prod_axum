@@ -18,6 +18,10 @@ strum_macros = "0.26.4"
 tracing = "0.1"
 tracing-subscriber = { version="0.3", features=["env-filter"]}
 uuid = { version="1", features=["v4", "fast-rng"]}
+rand = "0.8"
+hmac = "0.12"
+sha2 = "0.10"
+base64-url = "3.0.0"
 
 [dev-dependencies]
 anyhow = "1.0.91"

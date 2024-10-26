@@ -54,7 +54,7 @@ impl UserBy for UserAuth {}
 pub struct UserController;
 
 impl DbController for UserController {
-    const TABLE: &'static str = "user";
+    const TABLE: &'static str = "users";
 }
 
 impl UserController {

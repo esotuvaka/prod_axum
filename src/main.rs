@@ -2,6 +2,7 @@
 
 // region:    --- Modules
 
+mod auth;
 mod config;
 mod context;
 mod error;
