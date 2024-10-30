@@ -27,12 +27,10 @@ impl IntoResponse for Error {
         debug!("{:<12} - model::Error {self:?}", "INTO_RES");
 
         // Create a placeholder Axum reponse.
-        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        StatusCode::INTERNAL_SERVER_ERROR.into_response()
 
         // Insert the Error into the reponse.
         // response.extensions_mut().insert(self);
-
-        response
     }
 }
 

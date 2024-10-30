@@ -1,3 +1,4 @@
+use crate::auth::{password, EncryptContent};
 use crate::context::Ctx;
 use crate::model::user::{UserController, UserLogin};
 use crate::model::ModelManager;
@@ -33,6 +34,19 @@ async fn api_login_handler(
         .await?
         .ok_or(Error::LoginFailUsernameNotFound)?; // WARN: DO NOT log the username, because users sometimes accidentally input their password
     let user_id = user.id;
+
+    // Validate password
+    let Some(pwd) = user.pwd else {
+        return Err(Error::LoginFailUserHasNoPwd { user_id });
+    };
+    password::validate_pwd(
+        &EncryptContent {
+            salt: user.pwd_salt.to_string(),
+            content: pwd_clear.clone(),
+        },
+        &pwd,
+    )
+    .map_err(|_| Error::LoginFailPwdNotMatching { user_id });
 
     // FIXME: Implement real auth-token generation/signature.
     cookies.add(Cookie::new(web::AUTH_TOKEN, "user-1.exp.sign"));
