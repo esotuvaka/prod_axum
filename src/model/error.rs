@@ -1,4 +1,4 @@
-use crate::model::store;
+use crate::{auth, model::store};
 use core::result::Result as CoreResult;
 use serde::{Serialize, Serializer};
 use serde_json::Error as SerdeJsonError;
@@ -14,6 +14,7 @@ pub enum Error {
         entity: &'static str,
         id: i64,
     },
+    Auth(auth::Error),
     Store(store::Error),
     // -- External
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
@@ -40,6 +41,12 @@ impl From<serde_json::Error> for Error {
 impl From<sqlx::Error> for Error {
     fn from(val: sqlx::Error) -> Self {
         Self::Sqlx(val)
+    }
+}
+
+impl From<auth::Error> for Error {
+    fn from(val: auth::Error) -> Self {
+        Self::Auth(val)
     }
 }
 

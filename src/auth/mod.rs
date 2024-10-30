@@ -1,4 +1,5 @@
 mod error;
+pub mod password;
 
 pub use self::error::{Error, Result};
 

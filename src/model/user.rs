@@ -1,3 +1,4 @@
+use crate::auth::{self, EncryptContent};
 use crate::context::Ctx;
 use crate::model::base::{self, DbController};
 use crate::model::ModelManager;
@@ -82,6 +83,22 @@ impl UserController {
             .await?;
 
         Ok(entity)
+    }
+
+    pub async fn update_pwd(ctx: &Ctx, mm: &ModelManager, id: i64, pwd_clear: &str) -> Result<()> {
+        let db = mm.db();
+        let user: UserLogin = Self::get(ctx, mm, id).await?;
+        let pwd = auth::password::encrypt_pwd(&EncryptContent {
+            content: pwd_clear.to_string(),
+            salt: user.pwd_salt.to_string(),
+        })?;
+        let sql = format!("UPDATE {} SET pwd = $1 WHERE id = $2", Self::TABLE);
+        debug!("{sql}");
+
+        // Execute the query
+        sqlx::query(&sql).bind(pwd).bind(id).execute(db).await?;
+
+        Ok(())
     }
 }
 
